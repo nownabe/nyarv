@@ -6,12 +6,11 @@ module Nyarv
 
     def initialize(source)
       @iseq =
-        case source
-        when RubyVM::InstructionSequence
+        if source.is_a?(RubyVM::InstructionSequence)
           source
-        when !source.include?("\n") && File.exist?(File.expand_path(source))
-          RubyVM::InstructionSequence.new(File.read(File.expand_path(argv[0])))
-        when String
+        elsif !source.include?("\n") && File.exist?(source)
+          RubyVM::InstructionSequence.compile_file(source)
+        elsif source.is_a?(String)
           RubyVM::InstructionSequence.new(source)
         end
       @stack = []
