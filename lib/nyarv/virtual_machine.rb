@@ -48,7 +48,7 @@ module Nyarv
     def opt_send_without_block(*args)
       method_name = args[0][:mid]
       argc = args[0][:orig_argc]
-      args = argc.times.map { stack.pop }
+      args = Array.new(argc) { stack.pop }
       receiver = stack.pop
       stack.push receiver.send(method_name, *args)
     end
