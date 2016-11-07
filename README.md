@@ -12,7 +12,10 @@ git clone https://github.com/nownabe/nyarv.git
 ## Usage
 
 ```bash
-exe/nyarv 'puts "Hello, world!"'
+$ exe/nyarv 'puts "Hello, world!"' 2> /dev/null
+Hello, world!
+$ exe/nyarv 'print "Hello, nyarv!\n"' 2> /dev/null
+Hello, nyarv!
 ```
 
 ## Development
