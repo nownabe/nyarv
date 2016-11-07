@@ -21,17 +21,19 @@ module Nyarv
     def run
       iseq.to_a.last.each do |instruction|
         next unless instruction.is_a?(Array)
-        send(*instruction)
+        execute(instruction)
       end
     end
 
     private
 
-    # instructions
-
-    def trace(*arg)
-      $stderr.puts "Not Implemented 'trace'"
+    def execute(instruction)
+      send(*instruction)
+    rescue NoMethodError => e
+      $stderr.puts "\tNot implemented instruction '#{e.name}'"
     end
+
+    # instructions
 
     def putself
       stack.push scope
@@ -47,10 +49,6 @@ module Nyarv
       args = argc.times.map { stack.pop }
       receiver = stack.pop
       stack.push receiver.send(method_name, *args)
-    end
-
-    def leave(*args)
-      $stderr.puts "Not Implemented 'leave'"
     end
   end
 end
