@@ -28,7 +28,9 @@ module Nyarv
     private
 
     def execute(instruction)
+      $stderr.puts "Execute #{instruction}"
       send(*instruction)
+      $stderr.puts "\tStack: #{stack}"
     rescue NoMethodError => e
       $stderr.puts "\tNot implemented instruction '#{e.name}'"
     end
