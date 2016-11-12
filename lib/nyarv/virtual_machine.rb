@@ -1,37 +1,35 @@
 # frozen_string_literal: true
 
+require "nyarv/instruction_sequence"
+
 module Nyarv
   class VirtualMachine
     attr_reader :iseq, :scope, :stack
 
     def initialize(source)
-      @iseq =
-        if source.is_a?(RubyVM::InstructionSequence)
-          source
-        elsif !source.include?("\n") && File.exist?(source)
-          RubyVM::InstructionSequence.compile_file(source)
-        elsif source.is_a?(String)
-          RubyVM::InstructionSequence.new(source)
-        end
+      @iseq = InstructionSequence.from(source)
       @stack = []
       @scope = Kernel
+      @pc = 0
     end
 
     def run
-      iseq.to_a.last.each do |instruction|
-        next unless instruction.is_a?(Array)
+      loop do
+        instruction = iseq[@pc]
+        break unless instruction
         execute(instruction)
+        @pc += 1 + instruction.operands.size
       end
     end
 
     private
 
     def execute(instruction)
-      $stderr.puts "Execute #{instruction}"
-      send(*instruction)
-      $stderr.puts "\tStack: #{stack}"
+      $stderr.puts "Execute\t#{instruction}"
+      send(instruction.opecode, *instruction.operands)
+      $stderr.puts "\t(Stack: #{stack.map(&:inspect).join(', ')})"
     rescue NoMethodError => e
-      $stderr.puts "\tNot implemented instruction '#{e.name}'"
+      $stderr.puts "\t(Not implemented instruction '#{e.name}')"
     end
 
     # instructions
