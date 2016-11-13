@@ -14,8 +14,6 @@
 #   - push val
 #   - pop
 
-## block.arity
-
 ins :putself do
   push get_self
 end
@@ -24,7 +22,7 @@ ins :putstring do |string|
   push string
 end
 
-ins :opt_send_without_block do |info, cache|
+ins :send do |info, cache, block_iseq|
   method_name = info[:mid]
   args = Array.new(info[:orig_argc]) { pop }
   receiver = pop

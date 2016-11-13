@@ -13,9 +13,9 @@ module Nyarv
       if source.is_a?(RubyVM::InstructionSequence)
         new(source)
       elsif !source.include?("\n") && File.exist?(source)
-        new(RubyVM::InstructionSequence.compile_file(source))
+        new(RubyVM::InstructionSequence.compile_file(source, false))
       elsif source.is_a?(String)
-        new(RubyVM::InstructionSequence.new(source))
+        new(RubyVM::InstructionSequence.new(source, nil, nil, 1, false))
       end
     end
 
