@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "nyarv/instruction_executor"
 require "nyarv/instruction_sequence"
 require "nyarv/instructions_loader"
 
@@ -7,6 +8,7 @@ module Nyarv
   class VirtualMachine
     attr_reader :iseq, :scope, :stack
     attr_reader :pc, :sp, :cfp, :lfp, :dfp
+    attr_reader :instructions
 
     def initialize(source)
       @iseq = InstructionSequence.from(source)
@@ -14,7 +16,7 @@ module Nyarv
       @scope = Kernel
       @pc = @sp = 0
       @cfp = @lfp = @dfp = nil
-      @instructions = InstructionsLoader.new(self)
+      @instructions = InstructionsLoader.new.load
     end
 
     def run
@@ -24,6 +26,10 @@ module Nyarv
         execute(instruction)
         @pc += 1 + instruction.operands.size
       end
+    end
+
+    def get_self
+      scope
     end
 
     def pop
@@ -39,29 +45,7 @@ module Nyarv
     private
 
     def execute(instruction)
-      $stderr.puts "Execute\t#{instruction}"
-      send(instruction.opecode, *instruction.operands)
-      $stderr.puts "\t(Stack: #{stack[0...@sp].map(&:inspect).join(', ')})"
-    rescue NoMethodError => e
-      $stderr.puts "\t(Not implemented instruction '#{e.name}')"
-    end
-
-    # instructions
-
-    def putself
-      push scope
-    end
-
-    def putstring(string)
-      push string
-    end
-
-    def opt_send_without_block(*args)
-      method_name = args[0][:mid]
-      argc = args[0][:orig_argc]
-      args = Array.new(argc) { pop }
-      receiver = pop
-      push receiver.send(method_name, *args)
+      InstructionExecutor.new(self, instruction).execute
     end
   end
 end
