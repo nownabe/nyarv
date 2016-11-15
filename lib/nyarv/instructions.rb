@@ -14,6 +14,10 @@
 #   - push val
 #   - pop
 
+ins :putobject do |val|
+  push val
+end
+
 ins :putself do
   push get_self
 end
