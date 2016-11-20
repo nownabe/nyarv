@@ -1,34 +1,24 @@
 # frozen_string_literal: true
 
-# define instruction:
-#
-#   ins :instruction_name do |operand1, operand2, ...|
-#     instruction_body
-#   end
-#
-# define alias:
-#
-#   alias :opt_send_without_block, :send
-#
-# helpers:
-#   - push val
-#   - pop
+require "nyarv/instructions_loader"
 
-ins :putobject do |val|
-  push val
-end
+module Nyarv
+  class Instructions
+    class << self
+      attr_accessor :definition_file
 
-ins :putself do
-  push get_self
-end
+      def [](key)
+        instructions[key]
+      end
 
-ins :putstring do |string|
-  push string
-end
+      def instructions
+        @instructions ||=
+          InstructionsLoader.new(@definition_file || default_definition_file).load
+      end
 
-ins :send do |info, cache, block_iseq|
-  method_name = info[:mid]
-  args = Array.new(info[:orig_argc]) { pop }
-  receiver = pop
-  push receiver.send(method_name, *args)
+      def default_definition_file
+        File.expand_path("../instructions_definitions.rb", __FILE__)
+      end
+    end
+  end
 end

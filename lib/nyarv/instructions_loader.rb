@@ -2,22 +2,19 @@
 
 module Nyarv
   class InstructionsLoader
-    attr_reader :vm
+    attr_reader :definition_file
 
-    def initialize
-      @instructions = {}
+    def initialize(definition_file)
+      @definition_file = definition_file
     end
 
-    def load(def_file = File.expand_path("../instructions.rb", __FILE__))
-      instance_eval(File.read(def_file))
+    def load
+      @instructions = {}
+      instance_eval(File.read(definition_file))
       @instructions
     end
 
     private
-
-    def alias(alias_name, original_name)
-      @instructions[alias_name] = @instructions[original_name]
-    end
 
     def ins(name, &block)
       @instructions[name] = block

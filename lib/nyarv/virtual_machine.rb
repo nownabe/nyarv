@@ -8,15 +8,12 @@ module Nyarv
   class VirtualMachine
     attr_reader :iseq, :scope, :stack
     attr_reader :pc, :sp, :cfp, :lfp, :dfp
-    attr_reader :instructions
 
     def initialize(source)
       @iseq = InstructionSequence.from(source)
       @stack = []
       @scope = Kernel
       @pc = @sp = 0
-      @cfp = @lfp = @dfp = nil
-      @instructions = InstructionsLoader.new.load
     end
 
     def run
