@@ -1,48 +1,38 @@
 # frozen_string_literal: true
 
-require "nyarv/instruction_executor"
+require "nyarv/control_frame"
 require "nyarv/instruction_sequence"
-require "nyarv/instructions_loader"
 
 module Nyarv
   class VirtualMachine
-    attr_reader :iseq, :scope, :stack
-    attr_reader :pc, :sp, :cfp, :lfp, :dfp
+    attr_reader :iseq, :stack
 
     def initialize(source)
       @iseq = InstructionSequence.from(source)
       @stack = []
-      @scope = Kernel
-      @pc = @sp = 0
     end
 
     def run
-      loop do
-        instruction = iseq[@pc]
-        break unless instruction
-        execute(instruction)
-        @pc += 1 + instruction.operands.size
-      end
+      cf = ControlFrame.new(
+        self,
+        nil,
+        iseq,
+        main,
+        nil
+      )
+      cf.sp = 0
+      cf.ep = 0
+      cf.run
     end
 
-    def get_self
-      scope
-    end
-
-    def pop
-      @sp -= 1
-      stack[@sp]
-    end
-
-    def push(val)
-      stack[@sp] = val
-      @sp += 1
+    def dump_stack(sp)
+      $stderr.puts "\t(Stack: #{stack[0...sp].map(&:inspect).join(', ')})"
     end
 
     private
 
-    def execute(instruction)
-      InstructionExecutor.new(self, instruction).execute
+    def main
+      Object.new
     end
   end
 end

@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
 require "nyarv/instructions"
+require "forwardable"
 
 module Nyarv
   class InstructionExecutor
-    attr_reader :vm, :instruction
+    extend Forwardable
 
-    def initialize(vm, instruction)
-      @vm = vm
+    attr_reader :control_frame, :instruction
+
+    def initialize(control_frame, instruction)
+      @control_frame = control_frame
       @instruction = instruction
     end
 
@@ -21,27 +24,21 @@ module Nyarv
       end
 
       instance_exec(*instruction.operands, &instruction_proc)
-      print_stack
+      control_frame.dump_stack
     end
 
     private
 
-    def print_stack
-      $stderr.puts "\t(Stack: #{vm.stack[0...vm.sp].map(&:inspect).join(', ')})"
+    def method_missing(name, *args)
+      if control_frame.respond_to?(name)
+        control_frame.send(name, *args)
+      else
+        super
+      end
     end
 
-    # Helpers
-
-    def get_self
-      vm.get_self
-    end
-
-    def pop
-      vm.pop
-    end
-
-    def push(val)
-      vm.push(val)
+    def respond_to_missing?(name, include_private = false)
+      control_frame.respond_to?(name) || super
     end
   end
 end
