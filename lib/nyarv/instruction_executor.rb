@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "nyarv/instructions"
+
 module Nyarv
   class InstructionExecutor
     attr_reader :vm, :instruction
@@ -11,7 +13,7 @@ module Nyarv
 
     def execute
       $stderr.puts "Execute\t#{instruction}"
-      instruction_proc = vm.instructions[instruction.opecode]
+      instruction_proc = Instructions[instruction.opecode]
 
       unless instruction_proc
         $stderr.puts "\t(Not implemented instruction '#{instruction.opecode}')"
